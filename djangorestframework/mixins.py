@@ -669,6 +669,13 @@ class PaginatorMixin(object):
 
         return url
 
+    def root(self):
+        """
+        Returns a url to the page with number 1
+        """
+        return self.url_with_page_number(1)
+        
+
     def next(self, page):
         """
         Returns a url to the next page of results (if any)
@@ -690,6 +697,7 @@ class PaginatorMixin(object):
         This is some useful information that is added to the response
         """
         return {
+            'root': self.root(),
             'next': self.next(page),
             'page': page.number,
             'pages': page.paginator.num_pages,
