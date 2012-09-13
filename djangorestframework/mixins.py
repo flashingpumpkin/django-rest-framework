@@ -642,9 +642,12 @@ class PaginatorMixin(object):
     Obviously should only be used on lists :)
 
     A default limit can be set by setting `limit` on the object. This will also
-    be used as the maximum if the client sets the `limit` GET param
+    be used as the maximum if the client sets the `limit` GET param. 
+
+    A different results key can be set by setting `results_key` on the object.
     """
     limit = 20
+    results_key = 'results'
 
     def get_limit(self):
         """
@@ -738,6 +741,6 @@ class PaginatorMixin(object):
         serialized_object_list = self._resource.filter_response(page.object_list)
         serialized_page_info = self.serialize_page_info(page)
 
-        serialized_page_info['results'] = serialized_object_list
+        serialized_page_info[self.results_key] = serialized_object_list
 
         return serialized_page_info
