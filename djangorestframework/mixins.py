@@ -709,6 +709,13 @@ class PaginatorMixin(object):
             'total': page.paginator.count,
         }
 
+    def filter_page(self, page):
+        """
+        Hook todo some custom filtering or sorting of the current
+        page's content.
+        """
+        return page
+
     def filter_response(self, obj):
         """
         Given the response content, paginate and then serialize.
@@ -736,7 +743,7 @@ class PaginatorMixin(object):
             raise ErrorResponse(status.HTTP_404_NOT_FOUND,
                                 {'detail': 'That page contains no results'})
 
-        page = paginator.page(page_num)
+        page = self.filter_page(paginator.page(page_num))
 
         serialized_object_list = self._resource.filter_response(page.object_list)
         serialized_page_info = self.serialize_page_info(page)
