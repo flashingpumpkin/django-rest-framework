@@ -46,6 +46,19 @@ class CommentSerializer(serializers.Serializer):
             setattr(instance, key, val)
         return instance
 
+class FieldRemappingSerializer(serializers.Serializer):
+    from_email = serializers.EmailField(data_key = 'from')
+
+    def validate_from_email(self, attrs, source):
+        """
+        Test method name should be derived from the given
+        attribute name not from the data key
+        """
+        email = attrs[source]
+
+        if email == 'test@example.com':
+            raise serializers.ValidationError('No test emails please')
+        return attrs
 
 class NamesSerializer(serializers.Serializer):
     first = serializers.CharField()
@@ -264,6 +277,16 @@ class BasicTests(TestCase):
         """
         self.assertRaises(AssertionError, PersonSerializerInvalidReadOnly, [])
 
+    def test_remapping_data_to_fields(self):
+        serializer = FieldRemappingSerializer(data = {'from': 'valid@example.com'})
+        self.assertEqual(serializer.is_valid(), True)
+        self.assertTrue('from_email' in serializer.object)
+
+        serializer = FieldRemappingSerializer(data = {'from': 'test@example.com'})
+        self.assertEqual(serializer.is_valid(), False)
+
+        serializer = FieldRemappingSerializer({'from_email': 'valid@example.com'})
+        self.assertTrue('from' in serializer.data)
 
 class DictStyleSerializer(serializers.Serializer):
     """

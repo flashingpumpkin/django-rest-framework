@@ -98,9 +98,16 @@ def _get_declared_fields(bases, attrs):
 
     Note that all fields from the base classes are used.
     """
-    fields = [(field_name, attrs.pop(field_name))
-              for field_name, obj in list(six.iteritems(attrs))
-              if isinstance(obj, Field)]
+    fields = []
+    mappings = []
+
+    for (field_name, obj) in list(six.iteritems(attrs)):
+        if isinstance(obj, Field): 
+            key_name = getattr(obj, 'data_key') or field_name
+
+            fields.append((key_name, obj))
+            mappings.append((key_name, field_name))
+
     fields.sort(key=lambda x: x[1].creation_counter)
 
     # If this class is subclassing another Serializer, add that Serializer's
@@ -109,13 +116,15 @@ def _get_declared_fields(bases, attrs):
     for base in bases[::-1]:
         if hasattr(base, 'base_fields'):
             fields = list(base.base_fields.items()) + fields
+        if hasattr(base, 'field_mappings'):
+            mappings = list(base.field_mappings.items()) + mappings
 
-    return SortedDict(fields)
+    return SortedDict(fields), SortedDict(mappings)
 
 
 class SerializerMetaclass(type):
     def __new__(cls, name, bases, attrs):
-        attrs['base_fields'] = _get_declared_fields(bases, attrs)
+        attrs['base_fields'], attrs['field_mappings'] = _get_declared_fields(bases, attrs)
         return super(SerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 
@@ -254,7 +263,8 @@ class BaseSerializer(WritableField):
             if field_name in self._errors:
                 continue
             try:
-                validate_method = getattr(self, 'validate_%s' % field_name, None)
+                mapping_name = self.field_mappings.get(field_name, field_name)
+                validate_method = getattr(self, 'validate_%s' % mapping_name, None)
                 if validate_method:
                     source = field.source or field_name
                     attrs = validate_method(attrs, source)
@@ -317,10 +327,13 @@ class BaseSerializer(WritableField):
             attrs = self.restore_fields(data, files)
             if attrs is not None:
                 attrs = self.perform_validation(attrs)
+
         else:
             self._errors['non_field_errors'] = ['No input provided']
 
         if not self._errors:
+            # Remap raw data keys to serializer attribute names
+            attrs = dict([(self.field_mappings.get(k, k), v) for (k, v) in attrs.items()])
             return self.restore_object(attrs, instance=getattr(self, 'object', None))
 
     def field_to_native(self, obj, field_name):

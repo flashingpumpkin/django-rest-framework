@@ -110,7 +110,7 @@ class Field(object):
     form_field_class = forms.CharField
     type_label = 'field'
 
-    def __init__(self, source=None, label=None, help_text=None):
+    def __init__(self, source=None, label=None, help_text=None, data_key=None):
         self.parent = None
 
         self.creation_counter = Field.creation_counter
@@ -123,6 +123,8 @@ class Field(object):
 
         if help_text is not None:
             self.help_text = smart_text(help_text)
+
+        self.data_key = data_key
 
     def initialize(self, parent, field_name):
         """
@@ -222,7 +224,7 @@ class WritableField(Field):
     def __init__(self, source=None, label=None, help_text=None,
                  read_only=False, required=None,
                  validators=[], error_messages=None, widget=None,
-                 default=None, blank=None):
+                 default=None, blank=None, data_key=None):
 
         # 'blank' is to be deprecated in favor of 'required'
         if blank is not None:
@@ -231,7 +233,7 @@ class WritableField(Field):
                           DeprecationWarning, stacklevel=2)
             required = not(blank)
 
-        super(WritableField, self).__init__(source=source, label=label, help_text=help_text)
+        super(WritableField, self).__init__(source=source, label=label, help_text=help_text, data_key=data_key)
 
         self.read_only = read_only
         if required is None:
