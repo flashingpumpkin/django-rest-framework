@@ -14,9 +14,11 @@ The most common way to document Web APIs today is to produce documentation that 
 
 #### Django REST Swagger
 
-Marc Gibbon's [Django REST Swagger][django-rest-swagger] integrates REST framework with the [Swagger][swagger] API documentation tool.  The package produces well presented API documentation, and includes interactive tools for testing API endpoints.
+Marc Gibbons' [Django REST Swagger][django-rest-swagger] integrates REST framework with the [Swagger][swagger] API documentation tool.  The package produces well presented API documentation, and includes interactive tools for testing API endpoints.
 
 The pacakge is fully documented, well supported, and comes highly recommended.
+
+Django REST Swagger supports REST framework versions 2.3 and above.
 
 ![Screenshot - Django REST Swagger][image-django-rest-swagger]
 
@@ -43,6 +45,8 @@ There are various other online tools and services for providing API documentatio
 The browsable API that REST framwork provides makes it possible for your API to be entirely self describing.  The documentation for each API endpoint can be provided simply by visiting the URL in your browser.
 
 ![Screenshot - Self describing API][image-self-describing-api]
+
+---
 
 #### Setting the title
 
